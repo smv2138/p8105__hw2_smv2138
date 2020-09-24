@@ -6,3 +6,68 @@ output: github_document
 library(tidyverse)
 library(readxl)
 ```
+
+## Problem 1
+
+Read in the Mr.Trashwheel dataset
+
+```{r}
+trashwheel_df = 
+  read_xlsx(
+    "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+    sheet = "Mr. Trash Wheel",
+  range = cell_cols("A:N")) %>% 
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate(
+    sports_balls = round(sports_balls),
+    sports_balls = as.integer(sports_balls)
+  )
+```
+The columns 15-17 were added bc of the unnamed notes column
+
+Read precipitation data 2017 and 2018
+
+```{r}
+precip_2018 = 
+  read_excel(
+    "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+    sheet = "2018 Precipitation",
+    skip = 1
+    ) %>% 
+  janitor::clean_names() %>% 
+  drop_na(month) %>% 
+  mutate(year = 2018) %>% 
+  relocate(year)
+
+precip_2017 = 
+  read_excel(
+    "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+    sheet = "2017 Precipitation",
+    skip = 1
+    ) %>% 
+  janitor::clean_names() %>% 
+  drop_na(month) %>% 
+  mutate(year = 2017) %>% 
+  relocate(year)
+```
+
+Now combine precipitation datasets
+month.names are character vectors built into R
+   mutate(month = month.name[month])
+   But this is ugly and we don't like it
+Below is a better way
+```{r}
+month_df = 
+  tibble(
+    month = 1:12,
+    month_name = month.name
+  )
+
+precip_df = 
+  bind_rows(precip_2017, precip_2018)
+
+left_join(precip_df, month_df, by = "month")
+```
+
+This dataset contains information from the Mr.Trashwheel trash collector in Baltimore Maryland. As trash enters the inner harbor, the trashwheel collects that trash and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in our final dataset. Additionally, data sheets include month precipitation data. 
