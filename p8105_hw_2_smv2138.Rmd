@@ -74,7 +74,8 @@ This dataset contains information from the Mr.Trashwheel trash collector in Balt
 
 ## Problem 2
 
-Load NYC transit dataframe 
+# Part a
+Load NYC transit data frame and clean it. 
 
 ```{r}
 nyc_transit = 
@@ -83,7 +84,26 @@ nyc_transit =
   select(line:route11, entry, vending, entrance_type, ada) %>% 
   mutate(
     entry = recode(entry, "YES" = "TRUE", "NO" = "FALSE"))
-  
-  
 ```
+
+# Part b
+
+Descriptive understanding of the data frame.
+
+```{r}
+
+
+
+```
+
+## Problem 3
+
+Load pols-month csv file.
+
+```{r}
+pols_month = 
+  read_csv("./data/pols-month.csv") %>% 
+  separate(mon, into = c("year", "month", "day"), sep = 4, 6)
+```
+
 
