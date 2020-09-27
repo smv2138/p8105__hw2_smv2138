@@ -135,6 +135,7 @@ month_df_snp =
     month = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"),
     month_name = month.name
   )
+
 snp = 
   read_csv("./data/snp.csv") %>% 
   separate(date, into = c("month", "day", "year"))
@@ -143,7 +144,16 @@ snp_df =
   left_join(snp, month_df_snp, by = "month") %>% 
   select(-month, -day) %>% 
   relocate(month_name)
+```
+
+Load and clean unemployment csv.
+
+```{r}
+unemploy = 
+  read_csv("./data/unemployment.csv") %>% 
+  janitor::clean_names() 
 
 
+  
 ```
 
