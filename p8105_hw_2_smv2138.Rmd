@@ -1,6 +1,7 @@
 ---
-title: "Homework2"
+title: "Homework 2"
 output: github_document
+author: Sushupta Vijapur
 ---
 ```{r setup}
 library(tidyverse)
@@ -26,7 +27,7 @@ trashwheel_df =
 ```
 The columns 15-17 were added bc of the unnamed notes column
 
-Read precipitation data 2017 and 2018
+Read precipitation data 2017 and 2018 and clean.
 
 ```{r}
 precip_2018 = 
@@ -56,7 +57,7 @@ Now combine precipitation datasets
 month.names are character vectors built into R
    mutate(month = month.name[month])
    But this is ugly and we don't like it
-Below is a better way
+Below is a better way.
 ```{r}
 month_df = 
   tibble(
@@ -91,10 +92,16 @@ nyc_transit =
 Descriptive understanding of the data frame.
 
 ```{r}
+nrow(distinct(nyc_transit, line, station_name))
 
+filter(nyc_transit, ada == "TRUE")
 
-
+filter(nyc_transit, vending == "NO")
 ```
+
+This dataset contains information related to each extrance and exit for each subway station in NYC. There are `r nrow(nyc_transit)` in the observations in the data set and 19 variables. In order to clean the data, I used the "clean_names" function in the janitor package to change all variable naming mechanisms to snake case. Furthermore, I only selected in relevant variables into the data frame (line, station name, station latitude / longitude, routes served, entry, vending, entrance type and ADA compliance). Furthermore, I recoded the entry variable from Yes/No to a logical as True/False. 
+
+While running some descriptives on the dataset, I found that there was 465 distinct stations (defined by both the statio name and the line). Additionally, I found that there was 468 observations which are ADA compliant
 
 ## Problem 3
 
@@ -103,7 +110,11 @@ Load pols-month csv file.
 ```{r}
 pols_month = 
   read_csv("./data/pols-month.csv") %>% 
-  separate(mon, into = c("year", "month", "day"), sep = 4, 6)
+  separate(mon, into = c("year", "month"), sep = 4) %>% 
+  separate(month, into = c("month", "day"), sep = 3) %>% 
+  mutate(month = recode(month, "-" = ""))
+
+
 ```
 
 
