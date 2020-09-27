@@ -125,9 +125,25 @@ pols_month_df =
     president = recode(
       prez_dem, `1` = "dem", `0` = "gop")) %>% 
    select(-month, -prez_dem, -prez_gop, -day)
-
-  
-
 ```
 
+Load the snp csv file.
+
+```{r}
+month_df_snp = 
+  tibble(
+    month = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"),
+    month_name = month.name
+  )
+snp = 
+  read_csv("./data/snp.csv") %>% 
+  separate(date, into = c("month", "day", "year"))
+
+snp_df = 
+  left_join(snp, month_df_snp, by = "month") %>% 
+  select(-month, -day) %>% 
+  relocate(month_name)
+
+
+```
 
