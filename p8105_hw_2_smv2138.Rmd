@@ -8,7 +8,7 @@ library(tidyverse)
 library(readxl)
 ```
 
-## Problem 1
+# Problem 1
 
 Read in the Mr.Trashwheel dataset
 
@@ -73,9 +73,9 @@ left_join(precip_df, month_df, by = "month")
 
 This dataset contains information from the Mr.Trashwheel trash collector in Baltimore Maryland. As trash enters the inner harbor, the trashwheel collects that trash and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in our final dataset. Additionally, data sheets include month precipitation data. 
 
-## Problem 2
+# Problem 2
 
-# Part a
+## Part a
 Load NYC transit data frame and clean it. 
 
 ```{r}
@@ -87,7 +87,7 @@ nyc_transit =
     entry = recode(entry, "YES" = "TRUE", "NO" = "FALSE"))
 ```
 
-# Part b
+## Part b
 
 Descriptive understanding of the data frame.
 
@@ -99,21 +99,34 @@ filter(nyc_transit, ada == "TRUE")
 filter(nyc_transit, vending == "NO")
 ```
 
-This dataset contains information related to each extrance and exit for each subway station in NYC. There are `r nrow(nyc_transit)` in the observations in the data set and 19 variables. In order to clean the data, I used the "clean_names" function in the janitor package to change all variable naming mechanisms to snake case. Furthermore, I only selected in relevant variables into the data frame (line, station name, station latitude / longitude, routes served, entry, vending, entrance type and ADA compliance). Furthermore, I recoded the entry variable from Yes/No to a logical as True/False. 
+This dataset contains information related to each entrance and exit for each subway station in NYC. There are `r nrow(nyc_transit)` in the observations in the data set and 19 variables. In order to clean the data, I used the "clean_names" function in the janitor package to change all variable naming mechanisms to snake case. Furthermore, I only selected in relevant variables into the data frame (line, station name, station latitude / longitude, routes served, entry, vending, entrance type and ADA compliance). Furthermore, I recoded the entry variable from Yes/No to a logical as True/False. 
 
 While running some descriptives on the dataset, I found that there was 465 distinct stations (defined by both the statio name and the line). Additionally, I found that there was 468 observations which are ADA compliant
 
-## Problem 3
+# Problem 3
 
 Load pols-month csv file.
 
 ```{r}
+month_df = 
+  tibble(
+    month = c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"),
+    month_name = month.name
+  )
+
 pols_month = 
   read_csv("./data/pols-month.csv") %>% 
-  separate(mon, into = c("year", "month"), sep = 4) %>% 
-  separate(month, into = c("month", "day"), sep = 3) %>% 
-  mutate(month = recode(month, "-" = ""))
+  separate(mon, into = c("year", "month", "day"))
 
+pols_month_df =
+  left_join(pols_month, month_df) %>% 
+  relocate(month_name) %>%
+  mutate(
+    president = recode(
+      prez_dem, `1` = "dem", `0` = "gop")) %>% 
+   select(-month, -prez_dem, -prez_gop, -day)
+
+  
 
 ```
 
