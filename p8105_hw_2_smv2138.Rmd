@@ -10,12 +10,12 @@ library(readxl)
 
 # Problem 1
 
-Read in the Mr.Trashwheel dataset
+Read in the Mr.Trashwheel dataset and tidy data.
 
 ```{r}
 trashwheel_df = 
   read_xlsx(
-    "./data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
+    "./data/Trash-Wheel-Collection-Totals-7-2020-1.xlsx",
     sheet = "Mr. Trash Wheel",
   range = cell_cols("A:N")) %>% 
   janitor::clean_names() %>% 
@@ -25,7 +25,7 @@ trashwheel_df =
     sports_balls = as.integer(sports_balls)
   )
 ```
-The columns 15-17 were added bc of the unnamed notes column
+The columns 15-17 were added because of the unnamed notes column at the end of the dataset.
 
 Read precipitation data 2017 and 2018 and clean.
 
@@ -56,8 +56,7 @@ precip_2017 =
 Now combine precipitation datasets
 month.names are character vectors built into R
    mutate(month = month.name[month])
-   But this is ugly and we don't like it
-Below is a better way.
+   But there is a better way below.
 ```{r}
 month_df = 
   tibble(
@@ -89,19 +88,22 @@ nyc_transit =
 
 ## Part b
 
-Descriptive understanding of the data frame.
+Descriptive understanding of the data frame. (1) Finding out how many distinct stations there are and (2) how many stations are ADA compliant. (3) Lastly, finding the proportion of station entrances / exits without vending that allow entrance.
 
 ```{r}
-nrow(distinct(nyc_transit, line, station_name))
+nyc_transit %>% 
+  distinct(line, station_name)
 
-filter(nyc_transit, ada == "TRUE")
+nyc_transit %>% 
+  count(ada)
 
-filter(nyc_transit, vending == "NO")
+nyc_transit %>% 
+  count(entry, vending) 
 ```
 
-This dataset contains information related to each entrance and exit for each subway station in NYC. There are `r nrow(nyc_transit)` in the observations in the data set and 19 variables. In order to clean the data, I used the "clean_names" function in the janitor package to change all variable naming mechanisms to snake case. Furthermore, I only selected in relevant variables into the data frame (line, station name, station latitude / longitude, routes served, entry, vending, entrance type and ADA compliance). Furthermore, I recoded the entry variable from Yes/No to a logical as True/False. 
+This dataset contains information related to each entrance and exit for each subway station in NYC. There are `r nrow(nyc_transit)` in the observations in the data set and 19 variables. In order to clean the data, I used the "clean_names" function in the janitor package to change all variable naming mechanisms to snake case. Furthermore, I only selected in relevant variables into the data frame (line, station name, station latitude / longitude, routes served, entry, vending, entrance type and ADA compliance). Furthermore, I recoded the entry variable from Yes/No to a logical as True/False. The data here are tidy after making these adjustments to the formatting of the dataframe.
 
-While running some descriptives on the dataset, I found that there was 465 distinct stations (defined by both the statio name and the line). Additionally, I found that there was 468 observations which are ADA compliant
+(1) While running some descriptives on the dataset, I found that there was 465 distinct stations (defined by both the station name and the line). (2) Additionally, I found that there was 468 observations which are ADA compliant. (3) Lastly, among the entrance/exits that don't allow vending, 37.7% of them allow entry.
 
 # Problem 3
 
