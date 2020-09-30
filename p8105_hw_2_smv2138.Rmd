@@ -75,6 +75,7 @@ This dataset contains information from the Mr.Trashwheel trash collector in Balt
 # Problem 2
 
 ## Part a
+
 Load NYC transit data frame and clean it. 
 
 ```{r}
@@ -86,21 +87,43 @@ nyc_transit =
     entry = recode(entry, "YES" = "TRUE", "NO" = "FALSE"))
 ```
 
-## Part b
+This dataset contains information related to each entrance and exit for each subway station in NYC. There are `r nrow(nyc_transit)` in the observations in the data set and 19 variables. In order to clean the data, I used the "clean_names" function in the janitor package to change all variable naming mechanisms to snake case. Furthermore, I only selected in relevant variables into the data frame (line, station name, station latitude / longitude, routes served, entry, vending, entrance type and ADA compliance). Furthermore, I recoded the entry variable from Yes/No to a logical as True/False. The data are not tidy yet since the route data (numbers and names) are listed in a wide format and have many NA values.
 
-Descriptive understanding of the data frame. (1) Finding out how many distinct stations there are and (2) how many stations are ADA compliant. (3) Lastly, finding the proportion of station entrances / exits without vending that allow entrance.
+Run code to figure out descriptives in data.
 
 ```{r}
+no_vending_df = nyc_transit %>% 
+  filter(vending == "NO")
+prop_entrance = round(nrow(filter(no_vending_df, entry == TRUE)) / nrow(no_vending_df),3)
 
 
-
-nyc_transit %>% 
-  count(entry, vending) 
 ```
 
-This dataset contains information related to each entrance and exit for each subway station in NYC. There are `r nrow(nyc_transit)` in the observations in the data set and 19 variables. In order to clean the data, I used the "clean_names" function in the janitor package to change all variable naming mechanisms to snake case. Furthermore, I only selected in relevant variables into the data frame (line, station name, station latitude / longitude, routes served, entry, vending, entrance type and ADA compliance). Furthermore, I recoded the entry variable from Yes/No to a logical as True/False. The data here are tidy after making these adjustments to the formatting of the dataframe.
+While running some descriptives on the dataset, (1) I found that there were `r count(distinct(nyc_transit,line, station_name))` distinct stations (defined by both the station name and the line). (2) Additionally,  there were `r count(no_vending_df, ada = TRUE)` observations which were ADA compliant. (3) Lastly, among the entrance/exits that don't allow vending, 37.7% of them allow entry.
 
-While running some descriptives on the dataset, (1) I found that there were `r count(distinct(nyc_transit,line, station_name))` distinct stations (defined by both the station name and the line). (2) Additionally,  there were 468 observations which were ADA compliant. (3) Lastly, among the entrance/exits that don't allow vending, 37.7% of them allow entry.
+## Part b
+
+Cleaning and pivoting route number and names.
+
+```{r}
+nyc_transit_tidy = 
+nyc_transit %>% 
+  mutate(
+    route8 = as.character(route8),
+    route9 = as.character(route9),
+    route10 = as.character(route10),
+    route11 = as.character(route11)) %>% 
+  pivot_longer(
+    route1:route11,
+    names_to = "route_number",
+    names_prefix = "route",
+    values_to = "route_name") %>% 
+  drop_na("route_name")
+
+```
+
+The data are tidy after I reformatted the route data to list route number and route name in a long format instead of a wide format.There were `r nyc_transit_tidy %>% filter(route_name == "A") %>% distinct(line, station_name, route_name == "A") %>% count()` distinct stations that served the A train. Furthermore, of the stations that served the A train, `r nyc_transit_tidy %>% filter(route_name == "A" & ada =="TRUE") %>% distinct(line, station_name, route_name == "A") %>% count()` were ADA compliant.
+
 
 # Problem 3
 
@@ -121,8 +144,7 @@ pols_month_tidy =
   left_join(pols_month, month_pols) %>% 
   relocate(month_name) %>%
   mutate(
-    president = recode(
-      prez_dem, `1` = "dem", `0` = "gop")) %>% 
+    president = ifelse(prez_dem == 1, "dem", "gop")) %>% 
    select(-month, -prez_dem, -prez_gop, -day)
 ```
 
@@ -160,7 +182,7 @@ unemploy =
   pivot_longer(
     jan:dec,
     names_to = "month",
-    values_to = "percent"
+    values_to = "unemployment"
   ) 
 
 unemploy_tidy = 
@@ -178,7 +200,7 @@ prob3_df =
   left_join(unemploy_tidy, by = c('month_name' = 'month_name', 'year' = 'year'))
 ```
 
-The final merged "prob3_df" includes the "pols_month_tidy", "snp_tidy" and "unemploy_tidy" dataframes. The "pols_month_tidy" dataframe contains 822 observations. I recoded the date variable to be separate month and year columns. Also, I created a president column and used "prez_gop" and "prez_dem" to denote whether they were democrates or republicans. Furthermore, the dataset includes variables for the number of democratic/republican governors, senators and representatives. The "snp_tidy" dataframe gass 787 observations. Similar to in the pols_month_tidy dataframe, I separated the month and year variables into 2 separate columns. Lastly, the "unemploy_tidy" dataframe has 816 observations (after we pivoted the original file to long from wide). There is also a month and year column along with a percent column indicating the percentage of unemployment in each month of a certain year. 
+The final merged "prob3_df" includes the "pols_month_tidy", "snp_tidy" and "unemploy_tidy" dataframes. The "pols_month_tidy" dataframe contains 822 observations and 11 variables. I recoded the date variable to be separate month and year columns. Also, I created a president column and used "prez_gop" and "prez_dem" to denote whether they were democrates or republicans. Furthermore, the dataset includes variables for the number of democratic/republican governors, senators and representatives. The "snp_tidy" dataframe has 787 observations. Similar to in the pols_month_tidy dataframe, I separated the month and year variables into 2 separate columns. Lastly, the "unemploy_tidy" dataframe has 816 observations (after we pivoted the original file to long from wide). There is also a month and year column along with a percent column indicating the percentage of unemployment in each month of a certain year. 
 
 Once we merged these three dataframes, the final dataset contains `r nrow (prob3_df)` and `r ncol(prob3_df)`. This final dataframe contains all the same columns as in the 3 merged dataframes. The year range in this dataframe is `r range(as.numeric(pull(prob3_df, year)))`.
 
