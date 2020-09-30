@@ -70,7 +70,14 @@ precip_df =
 left_join(precip_df, month_df, by = "month")
 ```
 
-This dataset contains information from the Mr.Trashwheel trash collector in Baltimore Maryland. As trash enters the inner harbor, the trashwheel collects that trash and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in our final dataset. Additionally, data sheets include month precipitation data. 
+
+Now, join precipitation dataframs with the trashwheel dataframes.
+```{r}
+prob1_df = 
+  left_join(trashwheel_df, precip_df, by = "year")
+```
+
+This dataset contains information from the Mr.Trashwheel trash collector in Baltimore Maryland. As trash enters the inner harbor, the trashwheel collects that trash and stores it in a dumpster. The dataset contains information on year, month, and trash collected, include some specific types of trash. There are a total of `r nrow(trashwheel_df)` rows in our final dataset. Additionally, data sheets include month precipitation data. The total preciptiation in 2018 was `r sum(pull(precip_2018, total))` inches. Also, the median number of sports balls in a dumpster in 2017 was `r median(pull(prob1_df, sports_balls))`. 
 
 # Problem 2
 
